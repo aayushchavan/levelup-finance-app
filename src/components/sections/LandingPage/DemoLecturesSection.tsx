@@ -3,7 +3,13 @@
 import { Play, BookOpen, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-export function DemoLecturesSection() {
+interface DemoLecturesSectionProps {
+  youtubeUrl?: string;
+}
+
+export function DemoLecturesSection({
+  youtubeUrl = "https://www.youtube.com/embed/97QoYhUFxsA",
+}: DemoLecturesSectionProps) {
   return (
     <section id="demo-lectures" className="py-20">
       <div className="container">
@@ -23,7 +29,7 @@ export function DemoLecturesSection() {
               <div className="aspect-video w-full">
                 <iframe
                   className="w-full h-full"
-                  src="https://www.youtube.com/embed/97QoYhUFxsA"
+                  src={youtubeUrl}
                   title="LevelUp Finance Institute Demo Lecture"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen

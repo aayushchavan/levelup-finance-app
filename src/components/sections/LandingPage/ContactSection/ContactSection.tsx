@@ -1,7 +1,21 @@
 import { BatchInfo } from "./BatchInfo";
 import { ContactForm } from "./ContactForm";
 
-export function ContactSection() {
+interface ContactSectionProps {
+  batchStartDate?: string;
+  targetExams?: string;
+  fees?: string;
+  classSchedule?: string;
+  classMode?: string;
+}
+
+export function ContactSection({
+  batchStartDate,
+  targetExams,
+  fees,
+  classSchedule,
+  classMode,
+}: ContactSectionProps) {
   return (
     <section id="contact" className="py-20 bg-gradient-to-br from-primary/5 via-background to-accent/5">
       <div className="container">
@@ -15,7 +29,13 @@ export function ContactSection() {
         </div>
 
         <div className="max-w-5xl mx-auto grid gap-8 md:grid-cols-2">
-          <BatchInfo />
+          <BatchInfo
+            batchStartDate={batchStartDate}
+            targetExams={targetExams}
+            fees={fees}
+            classSchedule={classSchedule}
+            classMode={classMode}
+          />
           <ContactForm />
         </div>
       </div>
