@@ -16,49 +16,32 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
-async function fetchSettings(): Promise<{ settings: SiteSettings; debug: string }> {
+async function fetchSettings(): Promise<SiteSettings> {
   await headers(); // Forces dynamic rendering at request time, bypassing CDN/Full Route cache
   noStore();
   
-  const commitSha = process.env.VERCEL_GIT_COMMIT_SHA || "local";
-  const sheetId = process.env.SHEET_ID || "not_set";
   const googleServiceKey = process.env.GOOGLE_SERVICE_KEY;
-
-  let debugStatus = "unknown";
-  let isDefault = false;
-  let settings: SiteSettings;
+  const sheetId = process.env.SHEET_ID;
 
   if (!googleServiceKey || !sheetId) {
-    debugStatus = "missing_env_vars";
-    isDefault = true;
-    settings = DEFAULT_SETTINGS;
-  } else {
-    try {
-      settings = await getSettings({ serviceAccountKey: googleServiceKey, sheetId });
-      debugStatus = "success";
-      isDefault = false;
-    } catch (error) {
-      console.error("Error loading settings from Google Sheets:", error);
-      debugStatus = `failed: ${error instanceof Error ? error.message : String(error)}`;
-      isDefault = true;
-      settings = DEFAULT_SETTINGS;
-    }
+    return DEFAULT_SETTINGS;
   }
 
-  const debug = `COMMIT_SHA: ${commitSha} | SHEET_ID: ${sheetId} | BATCH_START: ${settings.batch_start_date} | EXAMS: ${settings.target_exams} | DEFAULT_SETTINGS: ${isDefault} | STATUS: ${debugStatus}`;
-
-  return { settings, debug };
+  try {
+    return await getSettings({ serviceAccountKey: googleServiceKey, sheetId });
+  } catch (error) {
+    console.error("Error loading settings from Google Sheets:", error);
+    return DEFAULT_SETTINGS;
+  }
 }
 
 export default async function Home() {
-  const { settings, debug } = await fetchSettings();
+  const settings = await fetchSettings();
   console.log("Homepage settings:", settings);
   const enrollmentOpen = settings.enrollment_open !== "false";
 
   return (
     <main className="min-h-screen">
-      {/* Diagnostics log rendered as a hidden element to inspect production values */}
-      <span style={{ display: "none" }} id="prod-debug-log">{debug}</span>
       <HeroSection
         batchStartDate={settings.batch_start_date}
         targetExams={settings.target_exams}
