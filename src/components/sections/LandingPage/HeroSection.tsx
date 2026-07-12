@@ -12,8 +12,8 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({
-  batchStartDate = "3rd January 2026",
-  targetExams = "Nov 2026 & Feb 2027",
+  batchStartDate = "Soon",
+  targetExams = "2027",
   location = "Kalyan (West)",
   enrollmentOpen = true,
   seatsLeft = "",

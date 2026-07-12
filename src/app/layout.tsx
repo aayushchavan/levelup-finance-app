@@ -33,16 +33,25 @@ export const metadata: Metadata = {
   },
 };
 
+import { getSettings } from "@/lib/services/googleSheets";
+import { unstable_noStore as noStore } from "next/cache";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function fetchSettings(): Promise<SiteSettings> {
+  noStore();
+  const googleServiceKey = process.env.GOOGLE_SERVICE_KEY;
+  const sheetId = process.env.SHEET_ID;
+
+  if (!googleServiceKey || !sheetId) {
+    return DEFAULT_SETTINGS;
+  }
+
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/settings`,
-      { cache: "no-store" }
-    );
-    if (!res.ok) return DEFAULT_SETTINGS;
-    const data = await res.json();
-    return { ...DEFAULT_SETTINGS, ...(data.settings ?? {}) };
-  } catch {
+    return await getSettings({ serviceAccountKey: googleServiceKey, sheetId });
+  } catch (error) {
+    console.error("Error loading settings in layout from Google Sheets:", error);
     return DEFAULT_SETTINGS;
   }
 }

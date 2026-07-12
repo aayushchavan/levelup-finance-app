@@ -10,8 +10,8 @@ interface BatchInfoProps {
 }
 
 export function BatchInfo({
-  batchStartDate = "3rd January 2026",
-  targetExams = "Nov 2026 & Feb 2027",
+  batchStartDate = "Soon",
+  targetExams = "2027",
   fees,
   classSchedule,
   classMode,

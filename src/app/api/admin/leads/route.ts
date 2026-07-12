@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getLeads, updateLeadStatus } from "@/lib/services/googleSheets";
+import { getLeads, updateLeadStatus, deleteLead } from "@/lib/services/googleSheets";
 
 function getConfig() {
   const googleServiceKey = process.env.GOOGLE_SERVICE_KEY;
@@ -29,5 +29,19 @@ export async function PATCH(request: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Failed to update status" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const { rowIndex } = await request.json();
+    if (!rowIndex) {
+      return NextResponse.json({ error: "Missing rowIndex" }, { status: 400 });
+    }
+    await deleteLead(rowIndex, getConfig());
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to delete lead" }, { status: 500 });
   }
 }

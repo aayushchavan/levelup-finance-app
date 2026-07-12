@@ -7,9 +7,18 @@ export async function POST(request: NextRequest) {
   try {
     const body: ContactFormData = await request.json();
 
+    // Sanitize inputs
+    const sanitizedBody = {
+      name: (body.name || "").trim(),
+      email: (body.email || "").trim(),
+      phone: (body.phone || "").trim(),
+      message: body.message,
+    };
+
     // Validate form data
-    const validation = validateContactForm(body);
+    const validation = validateContactForm(sanitizedBody);
     if (!validation.isValid) {
+      console.log("Validation failed:", validation.errors);
       return NextResponse.json(
         { error: "Validation failed", errors: validation.errors },
         { status: 400 }
@@ -30,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare submission data
     const submission = {
-      ...body,
+      ...sanitizedBody,
       timestamp: getTimestamp(),
     };
 

@@ -9,7 +9,10 @@ interface WhatsAppButtonProps {
 export function WhatsAppButton({ whatsapp }: WhatsAppButtonProps) {
   if (!whatsapp) return null;
 
-  const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent("Hi! I'm interested in CFA coaching at LevelUp Finance Institute.")}`;
+  const cleaned = whatsapp.replace(/[\s\-()+]/g, "");
+  const isOldNumber = cleaned === "918879229508" || cleaned === "8879229508";
+  const cleanNumber = isOldNumber ? "918450917541" : cleaned;
+  const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent("Hi! I'm interested in CFA coaching at LevelUp Finance Institute.")}`;
 
   return (
     <a

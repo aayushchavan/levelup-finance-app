@@ -4,16 +4,23 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-      setMobileMenuOpen(false);
+  const handleNavClick = (id: string) => {
+    if (pathname === "/") {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      router.push(`/#${id}`);
     }
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -39,42 +46,42 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
           <button
-            onClick={() => scrollToSection("home")}
+            onClick={() => handleNavClick("home")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             Home
           </button>
           <button
-            onClick={() => scrollToSection("about")}
+            onClick={() => handleNavClick("about")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             About
           </button>
           <button
-            onClick={() => scrollToSection("mentors")}
+            onClick={() => handleNavClick("mentors")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             Mentors
           </button>
           <button
-            onClick={() => scrollToSection("why-us")}
+            onClick={() => handleNavClick("why-us")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             Why Us
           </button>
           <button
-            onClick={() => scrollToSection("demo-lectures")}
+            onClick={() => handleNavClick("demo-lectures")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             Demo
           </button>
           <button
-            onClick={() => scrollToSection("location")}
+            onClick={() => handleNavClick("location")}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             Location
           </button>
-          <Button onClick={() => scrollToSection("contact")}>
+          <Button onClick={() => handleNavClick("contact")}>
             Enroll Now
           </Button>
         </nav>
@@ -97,42 +104,42 @@ export function Header() {
         <div className="md:hidden border-t bg-background">
           <nav className="container flex flex-col gap-4 py-4">
             <button
-              onClick={() => scrollToSection("home")}
+              onClick={() => handleNavClick("home")}
               className="text-sm font-medium text-left"
             >
               Home
             </button>
             <button
-              onClick={() => scrollToSection("about")}
+              onClick={() => handleNavClick("about")}
               className="text-sm font-medium text-left"
             >
               About
             </button>
             <button
-              onClick={() => scrollToSection("mentors")}
+              onClick={() => handleNavClick("mentors")}
               className="text-sm font-medium text-left"
             >
               Mentors
             </button>
             <button
-              onClick={() => scrollToSection("why-us")}
+              onClick={() => handleNavClick("why-us")}
               className="text-sm font-medium text-left"
             >
               Why Us
             </button>
             <button
-              onClick={() => scrollToSection("demo-lectures")}
+              onClick={() => handleNavClick("demo-lectures")}
               className="text-sm font-medium text-left"
             >
               Demo
             </button>
             <button
-              onClick={() => scrollToSection("location")}
+              onClick={() => handleNavClick("location")}
               className="text-sm font-medium text-left"
             >
               Location
             </button>
-            <Button onClick={() => scrollToSection("contact")}>
+            <Button onClick={() => handleNavClick("contact")}>
               Enroll Now
             </Button>
           </nav>

@@ -39,8 +39,8 @@ export interface SiteSettings {
 }
 
 export const DEFAULT_SETTINGS: SiteSettings = {
-  batch_start_date: "3rd January 2026",
-  target_exams: "Nov 2026 & Feb 2027",
+  batch_start_date: "Soon",
+  target_exams: "2027",
   fees: "",
   class_schedule: "Mon–Sat, 7:00 PM – 9:00 PM",
   class_mode: "Offline",
@@ -55,7 +55,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   location: "Kalyan (West), Mumbai",
   phone: "+91 88792 29508 / +91 84509 17541",
   email: "levelupfinanceinstitute@gmail.com",
-  whatsapp: "918879229508",
+  whatsapp: "918450917541",
   maps_url: "",
 
   instagram_url: "",

@@ -15,24 +15,28 @@ export interface ValidationResult {
 export function validateContactForm(data: ContactFormData): ValidationResult {
   const errors: Record<string, string> = {};
 
+  const name = (data.name || "").trim();
+  const email = (data.email || "").trim();
+  const phone = (data.phone || "").trim();
+
   // Name validation
-  if (!data.name || data.name.trim().length === 0) {
+  if (name.length === 0) {
     errors.name = "Name is required";
-  } else if (data.name.trim().length < 2) {
+  } else if (name.length < 2) {
     errors.name = "Name must be at least 2 characters";
   }
 
   // Email validation
-  if (!data.email || data.email.trim().length === 0) {
+  if (email.length === 0) {
     errors.email = "Email is required";
-  } else if (!isValidEmail(data.email)) {
+  } else if (!isValidEmail(email)) {
     errors.email = "Invalid email format";
   }
 
   // Phone validation
-  if (!data.phone || data.phone.trim().length === 0) {
+  if (phone.length === 0) {
     errors.phone = "Phone number is required";
-  } else if (!isValidPhone(data.phone)) {
+  } else if (!isValidPhone(phone)) {
     errors.phone = "Invalid phone number format";
   }
 

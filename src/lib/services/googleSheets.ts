@@ -108,8 +108,10 @@ export async function getSettings(
       }
     });
 
+    console.log("Settings loaded from Google:", partial);
     return { ...DEFAULT_SETTINGS, ...partial };
-  } catch {
+  } catch (error) {
+    console.error("Error fetching settings from Google Sheets:", error);
     return DEFAULT_SETTINGS;
   }
 }
@@ -166,6 +168,47 @@ export async function updateSetting(
       requestBody: { values },
     });
   }
+}
+
+/** Deletes a lead row in Sheet1 */
+export async function deleteLead(
+  rowIndex: number,
+  config: GoogleSheetsConfig
+): Promise<void> {
+  const sheets = initializeSheetsClient(config.serviceAccountKey);
+  const sheetName = config.sheetName || "Sheet1";
+
+  const spreadsheet = await sheets.spreadsheets.get({
+    spreadsheetId: config.sheetId,
+  });
+
+  const sheet = spreadsheet.data.sheets?.find(
+    (s) => s.properties?.title === sheetName
+  );
+
+  if (!sheet || sheet.properties?.sheetId === undefined || sheet.properties?.sheetId === null) {
+    throw new Error(`Sheet with title "${sheetName}" not found`);
+  }
+
+  const numericSheetId = sheet.properties.sheetId;
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: config.sheetId,
+    requestBody: {
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId: numericSheetId,
+              dimension: "ROWS",
+              startIndex: rowIndex - 1,
+              endIndex: rowIndex,
+            },
+          },
+        },
+      ],
+    },
+  });
 }
 
 /** Gets current timestamp in IST */

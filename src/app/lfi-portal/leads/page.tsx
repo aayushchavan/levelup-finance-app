@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Lead } from "@/lib/types/settings";
-import { Users, Search, Download, RefreshCw, TrendingUp, UserCheck, Phone } from "lucide-react";
+import { Users, Search, Download, RefreshCw, TrendingUp, UserCheck, Phone, Trash2 } from "lucide-react";
 
 const STATUS_OPTIONS = ["New", "Contacted", "Enrolled", "Rejected"] as const;
 
@@ -20,6 +20,7 @@ export default function LeadsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [updatingRow, setUpdatingRow] = useState<number | null>(null);
+  const [deletingRow, setDeletingRow] = useState<number | null>(null);
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -73,6 +74,31 @@ export default function LeadsPage() {
       alert("Failed to update status");
     } finally {
       setUpdatingRow(null);
+    }
+  };
+
+  const deleteRow = async (rowIndex: number) => {
+    if (!confirm("Are you sure you want to delete this lead?")) return;
+    setDeletingRow(rowIndex);
+    try {
+      const res = await fetch("/api/admin/leads", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rowIndex }),
+      });
+      if (res.ok) {
+        setLeads((prev) =>
+          prev
+            .filter((l) => l.rowIndex !== rowIndex)
+            .map((l) => (l.rowIndex > rowIndex ? { ...l, rowIndex: l.rowIndex - 1 } : l))
+        );
+      } else {
+        alert("Failed to delete lead");
+      }
+    } catch {
+      alert("Failed to delete lead due to network error");
+    } finally {
+      setDeletingRow(null);
     }
   };
 
@@ -191,6 +217,7 @@ export default function LeadsPage() {
                   <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Message</th>
                   <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
                   <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -205,7 +232,7 @@ export default function LeadsPage() {
                     <td className="px-5 py-4">
                       <select
                         value={lead.status}
-                        disabled={updatingRow === lead.rowIndex}
+                        disabled={updatingRow === lead.rowIndex || deletingRow === lead.rowIndex}
                         onChange={(e) => updateStatus(lead.rowIndex, e.target.value)}
                         className={`text-xs font-medium px-3 py-1.5 rounded-lg border bg-transparent cursor-pointer focus:outline-none transition ${STATUS_STYLES[lead.status] || STATUS_STYLES.New}`}
                       >
@@ -215,6 +242,16 @@ export default function LeadsPage() {
                           </option>
                         ))}
                       </select>
+                    </td>
+                    <td className="px-5 py-4">
+                      <button
+                        onClick={() => deleteRow(lead.rowIndex)}
+                        disabled={deletingRow === lead.rowIndex || updatingRow === lead.rowIndex}
+                        className="p-1.5 rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition disabled:opacity-50"
+                        title="Delete Lead"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}
