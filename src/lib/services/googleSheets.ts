@@ -170,6 +170,46 @@ export async function updateSetting(
   }
 }
 
+/** Updates all settings in the Settings sheet in a single batch write */
+export async function updateAllSettings(
+  settings: SiteSettings,
+  config: GoogleSheetsConfig
+): Promise<void> {
+  const sheets = initializeSheetsClient(config.serviceAccountKey);
+
+  try {
+    const values = Object.entries(settings).map(([k, v]) => [k, String(v)]);
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: config.sheetId,
+      range: "Settings!A:B",
+      valueInputOption: "RAW",
+      requestBody: { values },
+    });
+  } catch (error) {
+    console.error("Failed to batch update settings in Google Sheets, attempting to recreate sheet:", error);
+    try {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: config.sheetId,
+        requestBody: {
+          requests: [{ addSheet: { properties: { title: "Settings" } } }],
+        },
+      });
+
+      const values = Object.entries(settings).map(([k, v]) => [k, String(v)]);
+      await sheets.spreadsheets.values.update({
+        spreadsheetId: config.sheetId,
+        range: "Settings!A:B",
+        valueInputOption: "RAW",
+        requestBody: { values },
+      });
+    } catch (innerError) {
+      console.error("Critical error updating settings sheet:", innerError);
+      throw innerError;
+    }
+  }
+}
+
 /** Deletes a lead row in Sheet1 */
 export async function deleteLead(
   rowIndex: number,

@@ -10,34 +10,55 @@ import {
 import { DEFAULT_SETTINGS, SiteSettings } from "@/lib/types/settings";
 import { getSettings } from "@/lib/services/googleSheets";
 import { unstable_noStore as noStore } from "next/cache";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
-async function fetchSettings(): Promise<SiteSettings> {
+async function fetchSettings(): Promise<{ settings: SiteSettings; debug: string }> {
+  await headers(); // Forces dynamic rendering at request time, bypassing CDN/Full Route cache
   noStore();
+  
+  const commitSha = process.env.VERCEL_GIT_COMMIT_SHA || "local";
+  const sheetId = process.env.SHEET_ID || "not_set";
   const googleServiceKey = process.env.GOOGLE_SERVICE_KEY;
-  const sheetId = process.env.SHEET_ID;
+
+  let debugStatus = "unknown";
+  let isDefault = false;
+  let settings: SiteSettings;
 
   if (!googleServiceKey || !sheetId) {
-    return DEFAULT_SETTINGS;
+    debugStatus = "missing_env_vars";
+    isDefault = true;
+    settings = DEFAULT_SETTINGS;
+  } else {
+    try {
+      settings = await getSettings({ serviceAccountKey: googleServiceKey, sheetId });
+      debugStatus = "success";
+      isDefault = false;
+    } catch (error) {
+      console.error("Error loading settings from Google Sheets:", error);
+      debugStatus = `failed: ${error instanceof Error ? error.message : String(error)}`;
+      isDefault = true;
+      settings = DEFAULT_SETTINGS;
+    }
   }
 
-  try {
-    return await getSettings({ serviceAccountKey: googleServiceKey, sheetId });
-  } catch (error) {
-    console.error("Error loading settings from Google Sheets:", error);
-    return DEFAULT_SETTINGS;
-  }
+  const debug = `COMMIT_SHA: ${commitSha} | SHEET_ID: ${sheetId} | BATCH_START: ${settings.batch_start_date} | EXAMS: ${settings.target_exams} | DEFAULT_SETTINGS: ${isDefault} | STATUS: ${debugStatus}`;
+
+  return { settings, debug };
 }
 
 export default async function Home() {
-  const settings = await fetchSettings();
+  const { settings, debug } = await fetchSettings();
   console.log("Homepage settings:", settings);
   const enrollmentOpen = settings.enrollment_open !== "false";
 
   return (
     <main className="min-h-screen">
+      {/* Diagnostics log rendered as a hidden element to inspect production values */}
+      <span style={{ display: "none" }} id="prod-debug-log">{debug}</span>
       <HeroSection
         batchStartDate={settings.batch_start_date}
         targetExams={settings.target_exams}

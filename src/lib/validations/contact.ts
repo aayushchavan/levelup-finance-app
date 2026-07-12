@@ -58,10 +58,9 @@ function isValidEmail(email: string): boolean {
  * Validates phone number format (supports various formats)
  */
 function isValidPhone(phone: string): boolean {
-  // Remove spaces, dashes, parentheses, and plus signs
-  const cleaned = phone.replace(/[\s\-()+ ]/g, "");
+  // Extract all digits from the phone number
+  const digits = phone.replace(/\D/g, "");
   
-  // Check if it contains only digits and has a reasonable length (7-15 digits)
-  const phoneRegex = /^\d{7,15}$/;
-  return phoneRegex.test(cleaned);
+  // Check if the number of digits is reasonable (between 7 and 18 digits)
+  return digits.length >= 7 && digits.length <= 18;
 }
